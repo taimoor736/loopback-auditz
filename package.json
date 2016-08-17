@@ -1,8 +1,8 @@
 {
-  "name": "loopback-softdelete-mixin",
+  "name": "loopback-softdelete-mixin2",
   "version": "0.0.6",
-  "description": "A mixin to automatically generate created and updated Date attributes for loopback Models",
-  "main": "dist/index.js",
+  "description": "A mixin to provide soft deletes by adding a deletedAt attribute for loopback Models",
+  "main": "src/index.js",
   "scripts": {
     "preversion": "npm test",
     "pretest": "eslint ./src/*.js && gulp babel",
@@ -17,10 +17,12 @@
     "soft",
     "delete"
   ],
-  "author": "Sam Gaus",
+  "author": { "name" : "Jouke Visser"
+  , "email" : "jouke@studio-mv.nl"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gausie/loopback-softdelete-mixin.git"
+    "url": "https://github.com/studio-mv/loopback-softdelete-mixin.git"
   },
   "dependencies": {
     "babel-runtime": "^6.3.13",
