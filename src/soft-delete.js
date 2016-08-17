@@ -7,13 +7,14 @@ export default (Model, { deletedAt = 'deletedAt', scrub = false }) => {
   debug('options', { deletedAt, scrub });
 
   const properties = Model.definition.properties;
+  const idName = Model.dataSource.idName(Model.modelName);
 
   let scrubbed = {};
   if (scrub !== false) {
     let propertiesToScrub = scrub;
     if (!Array.isArray(propertiesToScrub)) {
       propertiesToScrub = Object.keys(properties)
-        .filter(prop => !properties[prop].id && prop !== deletedAt);
+        .filter(prop => !properties[prop][idName] && prop !== deletedAt);
     }
     scrubbed = propertiesToScrub.reduce((obj, prop) => ({ ...obj, [prop]: null }), {});
   }
@@ -30,7 +31,7 @@ export default (Model, { deletedAt = 'deletedAt', scrub = false }) => {
   Model.deleteAll = Model.destroyAll;
 
   Model.destroyById = function softDestroyById(id, cb) {
-    return Model.updateAll({ id: id }, { ...scrubbed, [deletedAt]: new Date()})
+    return Model.updateAll({ [idName]: id }, { ...scrubbed, [deletedAt]: new Date()})
       .then(result => (typeof cb === 'function') ? cb(null, result) : result)
       .catch(error => (typeof cb === 'function') ? cb(error) : Promise.reject(error));
   };
