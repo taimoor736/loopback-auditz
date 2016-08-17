@@ -83,7 +83,7 @@ export default (Model, { deletedAt = 'deletedAt', scrub = false }) => {
   Model.count = function countDeleted(where = {}, ...rest) {
     // Because count only receives a 'where', there's nowhere to ask for the deleted entities.
     let whereNotDeleted;
-    if (!where) {
+    if (Object.keys(where).length === 0) {
       whereNotDeleted = queryNonDeleted;
     } else {
       whereNotDeleted = { and: [ where, queryNonDeleted ] };
@@ -95,7 +95,7 @@ export default (Model, { deletedAt = 'deletedAt', scrub = false }) => {
   Model.update = Model.updateAll = function updateDeleted(where = {}, ...rest) {
     // Because update/updateAll only receives a 'where', there's nowhere to ask for the deleted entities.
     let whereNotDeleted;
-    if (!where) {
+    if (Object.keys(where).length === 0) {
       whereNotDeleted = queryNonDeleted;
     } else {
       whereNotDeleted = { and: [ where, queryNonDeleted ] };
