@@ -5,6 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "preversion": "npm test",
+    "compile": "gulp babel",
+    "prepublish": "npm run compile",
     "pretest": "eslint ./src/*.js && gulp babel",
     "test": "_mocha --compilers js:babel-core/register",
     "watch": "gulp",
