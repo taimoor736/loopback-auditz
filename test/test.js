@@ -15,12 +15,12 @@ const dataSource = app.createDataSource({ connector: app.Memory });
 // This is only a problem for memory connectors.
 const includeDeleted = { deleted: true, order: [] };
 
-describe('Loopback softDelete mixin', () => {
+describe('softDelete Feature', () => {
   describe('Querying', () => {
     it('excludes deleted instances by default during queries', () => {
       const Book = dataSource.createModel('querying_1',
         { id: { type: Number, generated: false, id: true }, name: String, type: String },
-        { mixins: { SoftDelete: true } }
+        { mixins: { Auditz: true } }
       );
 
       const booksCreated = [
@@ -42,7 +42,7 @@ describe('Loopback softDelete mixin', () => {
     it('includes deleted instances by configuration during queries', () => {
       const Book = dataSource.createModel('querying_2',
         { id: { type: Number, generated: false, id: true }, name: String, type: String },
-        { mixins: { SoftDelete: true } }
+        { mixins: { Auditz: true } }
       );
 
       const booksCreated = [
@@ -68,7 +68,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a deletedAt property to all matching', () => {
       const Book = dataSource.createModel('destroyAll_1',
         { name: String, type: String },
-        { mixins: { SoftDelete: true } }
+        { mixins: { Auditz: true } }
       );
 
       const booksCreated = [
@@ -90,7 +90,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a differently named property if configured', () => {
       const Book = dataSource.createModel('destroyAll_2',
         { name: String, type: String },
-        { mixins: { SoftDelete: { deletedAt: 'deletedOn' } } }
+        { mixins: { Auditz: { deletedAt: 'deletedOn' } } }
       );
 
       const booksCreated = [
@@ -116,7 +116,7 @@ describe('Loopback softDelete mixin', () => {
     it('should scrub all the non-key fields if configured', () => {
       const Book = dataSource.createModel('destroyAll_3',
         { name: String, type: String },
-        { mixins: { SoftDelete: { scrub: true } } }
+        { mixins: { Auditz: { scrub: true } } }
       );
 
       const booksCreated = [
@@ -148,7 +148,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a deletedAt property to the appropriate instance', () => {
       const Book = dataSource.createModel('destroyById_1',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: true } }
+        { mixins: { Auditz: true } }
       );
 
       const booksCreated = [
@@ -171,7 +171,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a differently named property if configured', () => {
       const Book = dataSource.createModel('destroyById_2',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: { deletedAt: 'deletedOn' } } }
+        { mixins: { Auditz: { deletedAt: 'deletedOn' } } }
       );
 
       const booksCreated = [
@@ -197,7 +197,7 @@ describe('Loopback softDelete mixin', () => {
     it('should scrub all the non-key fields if configured', () => {
       const Book = dataSource.createModel('destroyById_3',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: { scrub: true } } }
+        { mixins: { Auditz: { scrub: true } } }
       );
 
       const booksCreated = [
@@ -231,7 +231,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a deletedAt property to the instance', () => {
       const Book = dataSource.createModel('destroy_1',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: true } }
+        { mixins: { Auditz: true } }
       );
 
       return Book.create({ id: 1, name: 'book 1', type: 'fiction'})
@@ -245,7 +245,7 @@ describe('Loopback softDelete mixin', () => {
     it('should add a differently named property if configured', () => {
       const Book = dataSource.createModel('destroy_2',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: { deletedAt: 'deletedOn' } } }
+        { mixins: { Auditz: { deletedAt: 'deletedOn' } } }
       );
 
       return Book.create({ id: 1, name: 'book 1', type: 'fiction'})
@@ -259,7 +259,7 @@ describe('Loopback softDelete mixin', () => {
     it('should scrub all the non-key fields if configured', () => {
       const Book = dataSource.createModel('destroy_3',
         { id: {type: Number, generated: false, id: true}, name: String, type: String },
-        { mixins: { SoftDelete: { scrub: true } } }
+        { mixins: { Auditz: { scrub: true } } }
       );
 
       return Book.create({ id: 1, name: 'book 1', type: 'fiction'})

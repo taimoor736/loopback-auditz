@@ -1,15 +1,16 @@
 {
-  "name": "loopback-softdelete-mixin2",
-  "version": "0.0.11",
-  "description": "A mixin to provide soft deletes by adding a deletedAt attribute for loopback Models",
+  "name": "loopback-auditz",
+  "version": "0.1.0",
+  "description": "Adds comprehensive audit trail functionality to Loopback by keeping track of who created/modified/deleted data and when they did it, and adds a revisions model compatible with Sofa/Revisionable for PHP (https://github.com/jarektkaczyk/revisionable)",
   "main": "src/index.js",
   "scripts": {
     "preversion": "npm test",
     "compile": "gulp babel",
     "prepublish": "npm run compile",
     "pretest": "eslint ./src/*.js && gulp babel",
-    "test": "_mocha --compilers js:babel-core/register",
+    "test": "_mocha --compilers js:babel-core/register && nyc tap ./test/ts/*.js",
     "watch": "gulp",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "outdated": "npm outdated --depth=0"
   },
   "keywords": [
@@ -17,7 +18,11 @@
     "strongloop",
     "mixin",
     "soft",
-    "delete"
+    "delete",
+    "audit",
+    "trail",
+    "timestamp",
+    "revisions"
   ],
   "author": {
     "name": "Jouke Visser",
@@ -25,23 +30,32 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/studio-mv/loopback-softdelete-mixin.git"
+    "url": "https://github.com/jouke/loopback-auditz.git"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ],
+    "plugins": [
+      "transform-object-assign",
+      "transform-es2015-modules-commonjs"
+    ]
   },
   "dependencies": {
     "babel-runtime": "^6.3.13",
     "debug": "2.x"
   },
-  "peerDependencies": {
-    "loopback-datasource-juggler": ">=2.33.2"
-  },
   "devDependencies": {
     "babel-core": "^6.1.21",
     "babel-istanbul": "^0.5.8",
     "babel-plugin-add-module-exports": "^0.1.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-plugin-transform-object-assign": "^6.8.0",
     "babel-plugin-transform-object-rest-spread": "^6.1.18",
     "babel-plugin-transform-runtime": "^6.1.18",
     "babel-preset-es2015": "^6.1.18",
     "chai": "^3.4.1",
+    "coveralls": "latest",
     "eslint": "^1.9.0",
     "eslint-config-airbnb": "^1.0.0",
     "eslint-plugin-react": "^3.9.0",
@@ -50,6 +64,9 @@
     "gulp-sourcemaps": "^1.6.0",
     "loopback": "2.x",
     "loopback-boot": "2.x",
-    "mocha": "^2.3.4"
+    "loopback-datasource-juggler": ">=2.33.2",
+    "mocha": "^2.3.4",
+    "nyc": "latest",
+    "tap": "latest"
   }
 }
