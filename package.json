@@ -28,6 +28,7 @@
     "name": "Jouke Visser",
     "email": "jouke@studio-mv.nl"
   },
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/jouke/loopback-auditz.git"
