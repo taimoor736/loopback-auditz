@@ -8,3 +8,4 @@ npm-debug.log
 /auditz.js
 *.map
 .nyc_output
+.coveralls.yml
