@@ -165,6 +165,88 @@ test('loopback auditz', function(tap) {
   });
 
   tap.test('deletedAt', function(t) {
+    t.test('count excludes deleted instances by default', function(tt) {
+      var Book = app.model('counting_1',
+        { properties: { id: { type: Number, generated: false, id: true }, name: String, type: String },
+          mixins: { Auditz: true },
+          dataSource: 'db'
+        }
+      );
+
+      Book.create({ id: 1, name: 'book 1', type: 'fiction'});
+      Book.create({ id: 2, name: 'book 2', type: 'fiction'});
+      Book.create({ id: 3, name: 'book 3', type: 'non-fiction'});
+
+      Book.destroyAll({ type: 'non-fiction' }, function() {
+        Book.count({}, function(err, cnt) {
+          tt.equal(cnt, 2);
+          tt.end();
+        });
+      });
+    });
+
+    t.test('count excludes deleted instances even when a where is supplied', function(tt) {
+      var Book = app.model('counting_1',
+        { properties: { id: { type: Number, generated: false, id: true }, name: String, type: String },
+          mixins: { Auditz: true },
+          dataSource: 'db'
+        }
+      );
+
+      Book.create({ id: 1, name: 'book 1', type: 'fiction'});
+      Book.create({ id: 2, name: 'book 2', type: 'fiction'});
+      Book.create({ id: 3, name: 'book 3', type: 'non-fiction'});
+
+      Book.destroyById(2, function() {
+        Book.count({ type: 'fiction'}, function(err, cnt) {
+          tt.equal(cnt, 1);
+          tt.end();
+        });
+      });
+    });
+
+    t.test('findOrCreate excludes deleted instances by default', function(tt) {
+      var Book = app.model('findOrCreate_1',
+        { properties: { id: { type: Number, generated: false, id: true }, name: String, type: String },
+          mixins: { Auditz: true },
+          dataSource: 'db'
+        }
+      );
+
+      Book.create({ id: 1, name: 'book 1', type: 'fiction'});
+      Book.create({ id: 2, name: 'book 2', type: 'fiction'});
+      Book.create({ id: 3, name: 'book 3', type: 'non-fiction'});
+
+      Book.destroyById(2, function() {
+        Book.findOrCreate({where: {name: 'book 2'}}, { id: 4, name: 'book 2', type: 'non-fiction'}, function(err, book) {
+          tt.notEqual(book, null);
+          tt.notEqual(book.id, 2);
+          tt.equal(book.type, 'non-fiction');
+          tt.end();
+        });
+      });
+    });
+
+    t.test('findOrCreate excludes deleted instances even when where is not supplied', function(tt) {
+      var Book = app.model('findOrCreate_2',
+        { properties: { id: { type: Number, generated: false, id: true }, name: String, type: String },
+          mixins: { Auditz: true },
+          dataSource: 'db'
+        }
+      );
+
+      Book.create({ id: 1, name: 'book 1', type: 'fiction'});
+      Book.create({ id: 2, name: 'book 2', type: 'fiction'});
+      Book.create({ id: 3, name: 'book 3', type: 'non-fiction'});
+
+      Book.destroyById(2, function() {
+        Book.findOrCreate({}, { id: 4, name: 'book 2', type: 'non-fiction'}, function(err, book) {
+          tt.notEqual(book, null);
+          tt.end();
+        });
+      });
+    });
+
     t.test('excludes deleted instances by default during queries', function(tt) {
       var Book = app.model('querying_1',
         { properties: { id: { type: Number, generated: false, id: true }, name: String, type: String },
