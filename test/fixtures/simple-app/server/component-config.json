@@ -1,0 +1,7 @@
+{
+  "loopback-component-remote-ctx": {
+    "enabled": true,
+    "argName": "remoteCtx",
+    "blackList": ["User"]
+  }
+}

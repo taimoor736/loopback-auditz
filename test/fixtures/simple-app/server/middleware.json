@@ -10,6 +10,11 @@
   "parse": {
   },
   "routes": {
+    "loopback#rest": {
+      "paths": [
+        "${restApiRoot}"
+      ]
+    }
   },
   "files": {
   },

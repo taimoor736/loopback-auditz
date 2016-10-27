@@ -8,12 +8,17 @@ const warn = (options, message) => {
 };
 
 export default (Model, bootOptions = {}) => {
-  debug('SoftDelete mixin for Model %s', Model.modelName);
+  debug('Auditz mixin for Model %s', Model.modelName);
 
   const options = Object.assign({
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt',
+    createdBy: 'createdBy',
+    updatedBy: 'updatedBy',
+    deletedBy: 'deletedBy',
+    unknownUser: 0,
+    remoteCtx: 'remoteCtx',
     scrub: false,
     required: true,
     validateUpsert: false, // default to turning validation off
@@ -45,20 +50,40 @@ export default (Model, bootOptions = {}) => {
           validation is turned on and time stamps are required`);
   }
 
-  Model.defineProperty(options.deletedAt, {type: Date, required: false});
   Model.defineProperty(options.createdAt, {type: Date, required: options.required, defaultFn: 'now'});
   Model.defineProperty(options.updatedAt, {type: Date, required: options.required});
+  Model.defineProperty(options.deletedAt, {type: Date, required: false});
+
+  Model.defineProperty(options.createdBy, {type: Number, required: false});
+  Model.defineProperty(options.updatedBy, {type: Number, required: false});
+  Model.defineProperty(options.deletedBy, {type: Number, required: false});
 
   Model.observe('before save', (ctx, next) => {
+    let currentUser = options.unknownUser;
     debug('ctx.options', ctx.options);
+
+    if (ctx.options[options.remoteCtx]) {
+      // console.log('Received token: ', ctx.options[options.remoteCtx].req);
+      if (ctx.options[options.remoteCtx].req.accessToken) {
+        currentUser = ctx.options[options.remoteCtx].req.accessToken.userId;
+      }
+    }
+
+    if (ctx.isNewInstance !== undefined) {
+      debug('Setting %s.%s to %s', ctx.Model.modelName, options.createdBy, currentUser);
+      ctx.instance[options.createdBy] = currentUser;
+    }
+
     if (ctx.options && ctx.options.skipUpdatedAt) { return next(); }
     if (ctx.instance) {
       debug('%s.%s before save: %s', ctx.Model.modelName, options.updatedAt, ctx.instance.id);
       ctx.instance[options.updatedAt] = new Date();
+      ctx.instance[options.updatedBy] = currentUser;
     } else {
       debug('%s.%s before update matching %j',
         ctx.Model.pluralModelName, options.updatedAt, ctx.where);
       ctx.data[options.updatedAt] = new Date();
+      ctx.data[options.updatedBy] = currentUser;
     }
     return next();
   });

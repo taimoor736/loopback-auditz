@@ -3,13 +3,26 @@ var boot = require('loopback-boot');
 
 var app = module.exports = loopback();
 
+// app.use(function(req, res, next) {
+//   console.log('%s %s %s', req.method, req.path, req.accessToken);
+//   console.log(req.body);
+//   console.log(req.headers);
+//   next();
+// })
+
+app.use(loopback.token());
+
 app.start = function() {
   // start the web server
   return app.listen(function() {
-    app.emit('started');
     console.log('Web server listening at: %s', app.get('url'));
+    app.emit('started');
   });
 };
+
+app.stop = function() {
+  process.exit(0);
+}
 
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.

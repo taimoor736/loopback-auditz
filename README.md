@@ -8,14 +8,14 @@ This module is designed for the [Strongloop Loopback](https://github.com/strongl
 It consists of a group of functionalities:
 * Soft Deletes (based upon the work of [loopback-softdelete-mixin](https://github.com/gausie/loopback-softdelete-mixin)).
 * Timestamps of updates/creates (based upon the work of [loopback-ds-timestamp-mixin](https://github.com/clarkbw/loopback-ds-timestamp-mixin)). 
-* Registration of the user that created/updated/deleted (based upon the work of [loopback-component-remote-ctx](https://github.com/snowyu/loopback-component-remote-ctx.js)). *NOT YET IMPLEMENTED*
+* Registration of the user that created/updated/deleted (thanks to the work of [loopback-component-remote-ctx](https://github.com/snowyu/loopback-component-remote-ctx.js)). *NOT YET IMPLEMENTED*
 * History logging in a separate table (a port of [Sofa/Revisionable](https://github.com/jarektkaczyk/revisionable)). *NOT YET IMPLEMENTED*
 
 Install
 =======
 
 ```bash
-  npm install --save loopback-auditz
+  npm install --save loopback-component-remote-ctx loopback-auditz
 ```
 
 Server Config
@@ -41,6 +41,32 @@ Add the `mixins` property to your `server/model-config.json`:
 }
 ```
 
+Make sure you enable authentication by putting the following in a boot script (ie `server/boot/authentication.js`):
+
+```javascript
+'use strict';
+module.exports = function enableAuthentication(server) {
+  // enable authentication
+  server.enableAuth();
+};
+```
+
+Enable the `loopback-component-remote-ctx` by adding the following in your `server/component-config.json`:
+
+```json
+  "loopback-component-remote-ctx": {
+    "enabled": true,
+    "argName": "remoteCtx",
+    "blackList": ["User"]
+  }
+```
+
+And finally use the loopback token middleware by adding the following line to your `server/server.js`:
+
+```javascript
+app.use(loopback.token());
+```
+
 Configure
 =========
 
@@ -60,21 +86,62 @@ To use with your Models add the `mixins` attribute to the definition object of y
   },
 ```
 
-There are a number of configurable options to the mixin. You can specify an alternative property name for `deletedAt`, as well as configuring deletion to "scrub" the entity. If true, this sets all but the "id" fields to null. If an array, it will only scrub properties with those names.
+There are a number of configurable options to the mixin:
 
 ```json
   "mixins": {
     "Auditz": {
+      "createdAt": "created_at",
+      "updatedAt": "updated_at",
       "deletedAt": "deleted_at",
+      "createdBy": "created_by",
+      "updatedBy": "updated_by",
+      "deletedBy": "deleted_by",
+      "unknownUser": 0,
+      "remoteCtx": "remoteCtx",
       "scrub": true,
-      "createdAt" : "createdOn",
-      "updatedAt" : "updatedOn",
-      "required" : false,
+      "required": false,
       "validateUpsert": true,
       "silenceWarnings": false
      },
   },
 ```
+
+### createdAt
+This allows you to define an alternative name for the createdAt field
+
+### updatedAt
+This allows you to define an alternative name for the updatedAt field
+
+### deletedAt
+This allows you to define an alternative name for the deletedAt field
+
+### createdBy
+This allows you to define an alternative name for the createdBy field
+
+### updatedBy
+This allows you to define an alternative name for the updatedBy field
+
+### deletedBy
+This allows you to define an alternative name for the deletedBy field
+
+### unknownUser
+This allows you to define which userId should be filled out when no current user can be determined
+
+### remoteCtx
+The value you provided in `component-config.json` for `argName` of `loopback-component-remote-ctx`
+
+### scrub
+If true, this sets all but the "id" fields to null. If an array, it will only scrub properties with those names.
+
+### required
+This defines the requiredness of the createdAt and updatedAt fields. The `deletedAt` field is never required
+
+### validateUpsert
+This defines whether or not the validateUpsert property is set for the model
+
+### silenceWarnings
+This defines if the warnings should be suppressed or not
 
 Operation Options
 =================
@@ -100,7 +167,7 @@ To run queries that include deleted items in the response, add `{ deleted: true 
 
 License
 =======
-[ISC](LICENSE)
+[ISC](LICENSE.md)
 
 Author
 ======

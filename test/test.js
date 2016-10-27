@@ -21,6 +21,8 @@ test('loopback auditz', function(tap) {
         Widget.create({name: 'book 1', type: 'fiction'}, function(err, book) {
           tt.error(err);
           tt.type(book.createdAt, Date);
+          tt.equal(book.createdBy, 0);
+          tt.equal(book.updatedBy, 0);
           tt.end();
         });
       });
@@ -32,8 +34,12 @@ test('loopback auditz', function(tap) {
           tt.error(err);
           tt.type(book.createdAt, Date);
           book.name = 'book inf';
+          tt.equal(book.createdBy, 0);
+          tt.equal(book.updatedBy, 0);
           book.save(function(err, b) {
             tt.equal(book.createdAt, b.createdAt);
+            tt.equal(book.createdBy, 0);
+            tt.equal(book.updatedBy, 0);
             tt.end();
           });
         });
@@ -44,10 +50,12 @@ test('loopback auditz', function(tap) {
       Widget.destroyAll(function() {
         Widget.create({name:'book 1', type:'fiction'}, function(err, book) {
           tt.error(err);
+          tt.equal(book.createdBy, 0);
           tt.type(book.createdAt, Date);
           book.updateAttributes({ name:'book inf' }, function(err, b) {
             tt.error(err);
             tt.equal(book.createdAt, b.createdAt);
+            tt.equal(book.createdBy, 0);
             tt.end();
           });
         });
@@ -58,10 +66,12 @@ test('loopback auditz', function(tap) {
       Widget.destroyAll(function() {
         Widget.create({name:'book 1', type:'fiction'}, function(err, book) {
           tt.error(err);
+          tt.equal(book.createdBy, 0);
           tt.type(book.createdAt, Date);
           Widget.upsert({id: book.id, name:'book inf'}, function(err, b) {
             tt.error(err);
             tt.equal(book.createdAt.getTime(), b.createdAt.getTime());
+            tt.equal(book.createdBy, 0);
             tt.end();
           });
         });
@@ -73,12 +83,14 @@ test('loopback auditz', function(tap) {
       Widget.destroyAll(function() {
         Widget.create({name:'book 1', type:'fiction'}, function(err, book) {
           tt.error(err);
+          tt.equal(book.createdBy, 0);
           tt.type(book.createdAt, Date);
           Widget.updateAll({ type:'fiction' }, { type:'non-fiction' }, function(err) {
             tt.error(err);
             Widget.findById(book.id, function(err, b) {
               tt.error(err);
               tt.equal(book.createdAt.getTime(), b.createdAt.getTime());
+              tt.equal(book.createdBy, 0);
               tt.end();
             });
           });

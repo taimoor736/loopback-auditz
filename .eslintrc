@@ -3,5 +3,8 @@
   "ecmaFeatures": {
     "restParams": true,
     "experimentalObjectRestSpread": true
+  },
+  "rules":{
+    "no-console":0
   }
 }
