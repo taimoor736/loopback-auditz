@@ -1,6 +1,6 @@
 {
   "name": "loopback-auditz",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Adds comprehensive audit trail functionality to Loopback by keeping track of who created/modified/deleted data and when they did it, and adds a revisions model compatible with Sofa/Revisionable for PHP (https://github.com/jarektkaczyk/revisionable)",
   "main": "src/index.js",
   "scripts": {
