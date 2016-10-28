@@ -527,6 +527,22 @@ test('loopback auditz', function(tap) {
       });
     });
 
+    t.test('should error on invalid call to destroyAll', function(tt) {
+      var Book = app.model('destroy_4',
+        {
+          properties: {id: {type: Number, generated: false, id: true}, name: String, type: String},
+          mixins    : {Auditz: { scrub: true}},
+          dataSource: 'db'
+        }
+      );
+
+      Book.destroyAll('wrong', function (err, b) {
+        tt.notEqual(err, null);
+        tt.end();
+      });
+    });
+
+
     t.end();
   });
 
