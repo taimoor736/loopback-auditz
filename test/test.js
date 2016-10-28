@@ -320,8 +320,10 @@ test('loopback auditz', function(tap) {
         Book.find(includeDeleted, function(err, books) {
           tt.notEqual(books[0].deletedAt, null);
           tt.notEqual(books[0].deletedAt, undefined);
+          tt.equal(books[0].deletedBy, 0);
           tt.notEqual(books[1].deletedAt, null);
           tt.notEqual(books[1].deletedAt, undefined);
+          tt.equal(books[1].deletedBy, 0);
           tt.equal(books[2].deletedAt, undefined);
           tt.end();
         });

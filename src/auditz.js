@@ -59,31 +59,51 @@ export default (Model, bootOptions = {}) => {
   Model.defineProperty(options.deletedBy, {type: Number, required: false});
 
   Model.observe('before save', (ctx, next) => {
-    let currentUser = options.unknownUser;
     debug('ctx.options', ctx.options);
 
+    // determine the currently logged in user. Default to options.unknownUser
+    let currentUser = options.unknownUser;
+
     if (ctx.options[options.remoteCtx]) {
-      // console.log('Received token: ', ctx.options[options.remoteCtx].req);
       if (ctx.options[options.remoteCtx].req.accessToken) {
         currentUser = ctx.options[options.remoteCtx].req.accessToken.userId;
       }
     }
 
+    // If it's a new instance, set the createdBy to currentUser
     if (ctx.isNewInstance !== undefined) {
       debug('Setting %s.%s to %s', ctx.Model.modelName, options.createdBy, currentUser);
       ctx.instance[options.createdBy] = currentUser;
+    } else {
+      // if the createdBy and createdAt are sent along in the data to save, remove the keys
+      // as we don't want to let the user overwrite it
+      if (ctx.instance) {
+        delete ctx.instance[options.createdBy];
+        delete ctx.instance[options.createdAt];
+      } else {
+        delete ctx.data[options.createdBy];
+        delete ctx.data[options.createdAt];
+      }
     }
 
+
     if (ctx.options && ctx.options.skipUpdatedAt) { return next(); }
+    let keyAt = options.updatedAt;
+    let keyBy = options.updatedBy;
+    // Since soft deletes replace the actual delete by an update, we set the option
+    // 'delete' in the overridden delete functions that perform updates.
+    // We now have to determine if we need to set updatedAt/updatedBy or
+    // deletedAt/deletedBy
+    if (ctx.options && ctx.options.delete) {
+      keyAt = options.deletedAt;
+      keyBy = options.deletedBy;
+    }
     if (ctx.instance) {
-      debug('%s.%s before save: %s', ctx.Model.modelName, options.updatedAt, ctx.instance.id);
-      ctx.instance[options.updatedAt] = new Date();
-      ctx.instance[options.updatedBy] = currentUser;
+      ctx.instance[keyAt] = new Date();
+      ctx.instance[keyBy] = currentUser;
     } else {
-      debug('%s.%s before update matching %j',
-        ctx.Model.pluralModelName, options.updatedAt, ctx.where);
-      ctx.data[options.updatedAt] = new Date();
-      ctx.data[options.updatedBy] = currentUser;
+      ctx.data[keyAt] = new Date();
+      ctx.data[keyBy] = currentUser;
     }
     return next();
   });
@@ -95,7 +115,7 @@ export default (Model, bootOptions = {}) => {
       callback = where;
       query = {};
     }
-    return Model.updateAll(query, { ...scrubbed, [options.deletedAt]: new Date() })
+    return Model.updateAll(query, { ...scrubbed }, {delete: true})
       .then(result => (typeof callback === 'function') ? callback(null, result) : result)
       .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
   };
@@ -103,10 +123,15 @@ export default (Model, bootOptions = {}) => {
   Model.remove = Model.destroyAll;
   Model.deleteAll = Model.destroyAll;
 
-  Model.destroyById = function softDestroyById(id, cb) {
-    return Model.updateAll({ [idName]: id }, { ...scrubbed, [options.deletedAt]: new Date()})
-      .then(result => (typeof cb === 'function') ? cb(null, result) : result)
-      .catch(error => (typeof cb === 'function') ? cb(error) : Promise.reject(error));
+  Model.destroyById = function softDestroyById(id, opt, cb) {
+    const callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
+    let newOpt = {delete: true};
+    if (typeof opt === 'object') {
+      newOpt.remoteCtx = opt.remoteCtx;
+    }
+    return Model.updateAll({ [idName]: id }, { ...scrubbed}, newOpt)
+      .then(result => (typeof callback === 'function') ? callback(null, result) : result)
+      .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
   };
 
   Model.removeById = Model.destroyById;
@@ -115,7 +140,7 @@ export default (Model, bootOptions = {}) => {
   Model.prototype.destroy = function softDestroy(opt, cb) {
     const callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
 
-    return this.updateAttributes({ ...scrubbed, [options.deletedAt]: new Date() })
+    return this.updateAttributes({ ...scrubbed }, {delete: true})
       .then(result => (typeof cb === 'function') ? callback(null, result) : result)
       .catch(error => (typeof cb === 'function') ? callback(error) : Promise.reject(error));
   };
