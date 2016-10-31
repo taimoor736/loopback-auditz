@@ -381,6 +381,108 @@ app.on('started', function() {
           });
       });
 
+      t.test('Add a multiple delete entries on destroyAll', function(tt) {
+        revisions.destroyAll(function() {
+          request(app)
+            .patch('/api/Widgets')
+            .set({Authorization: 'Bearer '+creatorToken})
+            .send([{name: 'book 1', type: 'fiction'},{name: 'book 2', type: 'non-fiction'},{name: 'book 3', type: 'fiction'}])
+            .expect(200)
+            .end(function (err, res) {
+              var books = res.body;
+              tt.error(err);
+              tt.equal(books.length, 3);
+              books[0].name = 'book inf';
+              request(app)
+                .patch('/api/Widgets/'+books[0].id)
+                .set({Authorization: 'Bearer '+modifierToken})
+                .send(books[0])
+                .expect(200)
+                .end(function (err, res) {
+                  var savedBook = res.body;
+                  tt.error(err);
+                  app.models.Widget.destroyAll(function(err, result) {
+                    tt.error(err);
+                    tt.equal(result.count, 3);
+                    revisions.find({order: 'id ASC'}, function(err, revs) {
+                      tt.error(err);
+                      // restore the old book.name value for comparison
+                      books[0].name = 'book 1';
+                      tt.equal(revs.length, 7);
+
+                      tt.equal(revs[0].action, 'create');
+                      tt.equal(revs[0].table_name, 'Widget');
+                      tt.equal(revs[0].row_id, books[0].id);
+                      tt.deepEqual(revs[0].old, null);
+                      tt.deepEqual(revs[0].new, books[0]);
+                      tt.equal(revs[0].user, '' + creatorUserId);
+                      tt.equal(revs[0].ip, '::ffff:127.0.0.1');
+                      tt.assert(revs[0].ip_forwarded == null);
+                      tt.notEqual(revs[0].created_at, null);
+                      tt.equal(revs[1].action, 'create');
+                      tt.equal(revs[1].table_name, 'Widget');
+                      tt.equal(revs[1].row_id, books[1].id);
+                      tt.deepEqual(revs[1].old, null);
+                      tt.deepEqual(revs[1].new, books[1]);
+                      tt.equal(revs[1].user, '' + creatorUserId);
+                      tt.equal(revs[1].ip, '::ffff:127.0.0.1');
+                      tt.assert(revs[1].ip_forwarded == null);
+                      tt.notEqual(revs[1].created_at, null);
+                      tt.equal(revs[2].action, 'create');
+                      tt.equal(revs[2].table_name, 'Widget');
+                      tt.equal(revs[2].row_id, books[2].id);
+                      tt.deepEqual(revs[2].old, null);
+                      tt.deepEqual(revs[2].new, books[2]);
+                      tt.equal(revs[2].user, '' + creatorUserId);
+                      tt.equal(revs[2].ip, '::ffff:127.0.0.1');
+                      tt.assert(revs[2].ip_forwarded == null);
+                      tt.notEqual(revs[2].created_at, null);
+
+                      tt.equal(revs[3].action, 'update');
+                      tt.equal(revs[3].table_name, 'Widget');
+                      tt.equal(revs[3].row_id, savedBook.id);
+                      tt.deepEqual(revs[3].old, books[0]);
+                      tt.deepEqual(revs[3].new, savedBook);
+                      tt.equal(revs[3].user, '' + modifierUserId);
+                      tt.equal(revs[3].ip, '::ffff:127.0.0.1');
+                      tt.assert(revs[3].ip_forwarded == null);
+                      tt.notEqual(revs[3].created_at, null);
+
+                      tt.equal(revs[4].action, 'delete');
+                      tt.equal(revs[4].table_name, 'Widget');
+                      tt.equal(revs[4].row_id, savedBook.id);
+                      tt.deepEqual(revs[4].old, savedBook);
+                      tt.deepEqual(revs[4].new, null);
+                      tt.equal(revs[4].user, '0');
+                      tt.equal(revs[4].ip, '127.0.0.1');
+                      tt.equal(revs[4].ip_forwarded, '');
+                      tt.notEqual(revs[4].created_at, null);
+                      tt.equal(revs[5].action, 'delete');
+                      tt.equal(revs[5].table_name, 'Widget');
+                      tt.equal(revs[5].row_id, books[1].id);
+                      tt.deepEqual(revs[5].old, books[1]);
+                      tt.deepEqual(revs[5].new, null);
+                      tt.equal(revs[5].user, '0');
+                      tt.equal(revs[5].ip, '127.0.0.1');
+                      tt.equal(revs[5].ip_forwarded, '');
+                      tt.notEqual(revs[5].created_at, null);
+                      tt.equal(revs[6].action, 'delete');
+                      tt.equal(revs[6].table_name, 'Widget');
+                      tt.equal(revs[6].row_id, books[2].id);
+                      tt.deepEqual(revs[6].old, books[2]);
+                      tt.deepEqual(revs[6].new, null);
+                      tt.equal(revs[6].user, '0');
+                      tt.equal(revs[6].ip, '127.0.0.1');
+                      tt.equal(revs[6].ip_forwarded, '');
+                      tt.notEqual(revs[6].created_at, null);
+                      tt.end();
+                    });
+                  });
+                });
+            });
+        });
+      });
+
 
       t.end();
 

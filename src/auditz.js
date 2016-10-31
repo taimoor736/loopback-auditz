@@ -122,6 +122,20 @@ export default (Model, bootOptions = {}) => {
               ip: ip,
               ip_forwarded: ipForwarded,
             }, next);
+          } else if (ctx.options.oldInstances) {
+            const entries = ctx.options.oldInstances.map(inst => {
+              return {
+                action: 'delete',
+                table_name: Model.modelName,
+                row_id: inst.id,
+                old: inst,
+                new: null,
+                user: currentUser,
+                ip: ip,
+                ip_forwarded: ipForwarded,
+              };
+            });
+            app.models[options.revisionsModelName].create(entries, next);
           } else {
             warn(options, 'Cannot register delete without old instance! Options: %j', ctx.options);
             return next();
@@ -129,13 +143,15 @@ export default (Model, bootOptions = {}) => {
         } else {
           if (!ctx.options.oldInstance) {
             warn(options, 'Cannot register update without old instance. Options: %j', ctx.options);
+            warn(options, 'instance: %j', ctx.instance);
+            warn(options, 'data: %j', ctx.data);
             return next();
           }
           const inst = ctx.instance || ctx.data;
           app.models[options.revisionsModelName].create({
             action: 'update',
             table_name: Model.modelName,
-            row_id: inst.id || 0,
+            row_id: inst.id,
             old: ctx.options.oldInstance,
             new: inst,
             user: currentUser,
@@ -167,7 +183,6 @@ export default (Model, bootOptions = {}) => {
               console.error(err);
               cb(err);
             } else {
-              // console.log('one old instance found');
               cb(null, oldInstance);
             }
           });
@@ -180,6 +195,7 @@ export default (Model, bootOptions = {}) => {
             } else {
               if (oldInstances.length > 1) {
                 warn(options, 'MULTIPLE old instances found');
+                return cb(null, oldInstances);
               } else if (oldInstances.length === 0) {
                 return cb();
               }
@@ -199,13 +215,17 @@ export default (Model, bootOptions = {}) => {
   Model.observe('before save', (ctx, next) => {
     const softDelete = ctx.options.delete;
 
-    getOldInstance(ctx, (err, instance) => {
+    getOldInstance(ctx, (err, result) => {
       if (err) {
         console.error(err);
         return next(err);
       }
 
-      ctx.options.oldInstance = instance;
+      if (Array.isArray(result)) {
+        ctx.options.oldInstances = result;
+      } else {
+        ctx.options.oldInstance = result;
+      }
       // determine the currently logged in user. Default to options.unknownUser
       let currentUser = options.unknownUser;
 
