@@ -91,6 +91,12 @@ export default (Model, bootOptions = {}) => {
         return next(err);
       }
       app = a;
+      let ipForwarded = '';
+      let ip = '127.0.0.1';
+      if (ctx.options.remoteCtx) {
+        ipForwarded = ctx.options.remoteCtx.req.headers['x-forwarded-for'];
+        ip = ctx.options.remoteCtx.req.connection.remoteAddress;
+      }
       // If it's a new instance, set the createdBy to currentUser
       if (ctx.isNewInstance) {
         app.models[options.revisionsModelName].create({
@@ -100,8 +106,8 @@ export default (Model, bootOptions = {}) => {
           old: null,
           new: ctx.instance,
           user: currentUser,
-          ip: '127.0.0.1', // TODO: get real ip address
-          ip_forwarded: '127.0.0.1', // TODO: get real forwarded ip address
+          ip: ip,
+          ip_forwarded: ipForwarded,
         }, next);
       } else {
         if (ctx.options && ctx.options.delete) {
@@ -113,8 +119,8 @@ export default (Model, bootOptions = {}) => {
               old: ctx.options.oldInstance,
               new: null,
               user: currentUser,
-              ip: '127.0.0.1', // TODO: get real ip address
-              ip_forwarded: '127.0.0.1', // TODO: get real forwarded ip address
+              ip: ip,
+              ip_forwarded: ipForwarded,
             }, next);
           } else {
             warn(options, 'Cannot register delete without old instance! Options: %j', ctx.options);
@@ -133,8 +139,8 @@ export default (Model, bootOptions = {}) => {
             old: ctx.options.oldInstance,
             new: inst,
             user: currentUser,
-            ip: '127.0.0.1', // TODO: get real ip address
-            ip_forwarded: '127.0.0.1', // TODO: get real forwarded ip address
+            ip: ip,
+            ip_forwarded: ipForwarded,
           }, next);
         }
       }
