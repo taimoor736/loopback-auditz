@@ -69,16 +69,22 @@ app.on('started', function() {
         request(app)
           .get('/api/Widgets')
           .end(function(err, res) {
+            if (err) {
+              console.error(err);
+            }
             var books = res.body;
             if (books.length === 0) {
-              return done();
+              return done(err);
             }
             books.forEach(function(book) {
               request(app)
                 .delete('/api/Widgets/'+book.id)
                 .set({Authorization: 'Bearer '+deleterToken})
-                .end(function() {
-                  done();
+                .end(function(err) {
+                  if (err) {
+                    console.error(err);
+                  }
+                  done(err);
                 });
             });
           });

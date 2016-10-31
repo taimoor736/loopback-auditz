@@ -1,0 +1,58 @@
+{
+  "name": "Revision",
+  "plural": "Revisions",
+  "base": "PersistedModel",
+  "description": "Keep track of changes in your models.",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "action": {
+      "type": "String",
+      "comments": "The action performed.",
+      "required": true
+    },
+    "table_name": {
+      "type": "String",
+      "comments": "The model affected",
+      "required": true
+    },
+    "row_id": {
+      "type": "Number",
+      "comments": "The modelId affected",
+      "required": true
+    },
+    "old": {
+      "type": "Any",
+      "comments": "The old instance",
+      "required": false
+    },
+    "new": {
+      "type": "Any",
+      "comments": "The new instance",
+      "required": false
+    },
+    "user": {
+      "type": "String",
+      "comments": "The user who made the change. This is a string to be compatible with Sofa/Revisionable, but we only store a userId (number)",
+      "required": false
+    },
+    "ip": {
+      "type": "String",
+      "comments": "IP address the change originated from",
+      "required": false
+    },
+    "ip_forwarded": {
+      "type": "String",
+      "comments": "Forwarded IP address the change originated from",
+      "required": false
+    },
+    "created_at": {
+      "type": "Date",
+      "comments": "The timestamp of the change",
+      "defaultFn": "now",
+      "required": false
+    }
+  }
+}

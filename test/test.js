@@ -548,15 +548,16 @@ test('loopback auditz', function(tap) {
 
   tap.test('boot options', function(t) {
 
-    var dataSource = app.models.Widget.getDataSource();
-
     t.test('should use createdOn and updatedOn instead', function(tt) {
-
-      var Book = dataSource.createModel('Book',
-        { name: String, type: String },
-        { mixins: {  Auditz: { createdAt:'createdOn', updatedAt:'updatedOn' } } }
+      var Book = app.model('createdOn_1',
+        {
+          properties: {id: {type: Number, generated: false, id: true}, name: String, type: String},
+          mixins    : {Auditz: { createdAt:'createdOn', updatedAt:'updatedOn' }},
+          dataSource: 'db'
+        }
       );
-      Book.destroyAll(function() {
+      Book.destroyAll(function(err) {
+        tt.error(err);
         Book.create({name:'book 1', type:'fiction'}, function(err, book) {
           tt.error(err);
 
@@ -572,9 +573,12 @@ test('loopback auditz', function(tap) {
     });
 
     t.test('should default required on createdAt and updatedAt ', function(tt) {
-      var Book = dataSource.createModel('Book',
-        { name: String, type: String },
-        { mixins: {  Auditz: true } }
+      var Book = app.model('required_1',
+        {
+          properties: {id: {type: Number, generated: false, id: true}, name: String, type: String},
+          mixins    : {Auditz: true},
+          dataSource: 'db'
+        }
       );
       tt.equal(Book.definition.properties.createdAt.required, true);
       tt.equal(Book.definition.properties.updatedAt.required, true);
@@ -582,9 +586,12 @@ test('loopback auditz', function(tap) {
     });
 
     t.test('should have optional createdAt and updatedAt', function(tt) {
-      var Book = dataSource.createModel('Book',
-        { name: String, type: String },
-        { mixins: {  Auditz: { required: false } } }
+      var Book = app.model('required_2',
+        {
+          properties: {id: {type: Number, generated: false, id: true}, name: String, type: String},
+          mixins    : {Auditz: { required: false }},
+          dataSource: 'db'
+        }
       );
       tt.equal(Book.definition.properties.createdAt.required, false);
       tt.equal(Book.definition.properties.updatedAt.required, false);
@@ -592,21 +599,21 @@ test('loopback auditz', function(tap) {
     });
 
     t.test('should turn on validation and upsert fails', function(tt) {
-
-      var Book = dataSource.createModel('Book',
-        { name: String, type: String },
+      var Book = app.model('validate_1',
         {
-          validateUpsert: true,  // set this to true for the Model
-          mixins: {  Auditz: { validateUpsert: true } }
+          properties: {id: {type: Number, generated: false, id: true}, name: String, type: String},
+          mixins    : {Auditz: { validateUpsert: true  }},
+          dataSource: 'db'
         }
       );
+
       Book.destroyAll(function() {
         Book.create({name:'book 1', type:'fiction'}, function(err, book) {
           tt.error(err);
           // this upsert call should fail because we have turned on validation
           Book.updateOrCreate({id:book.id, type: 'historical-fiction'}, function(err) {
             tt.equal(err.name, 'ValidationError');
-            tt.equal(err.details.context, 'Book');
+            tt.equal(err.details.context, 'validate_1');
             tt.ok(err.details.codes.createdAt.indexOf('presence') >= 0);
             tt.end();
           });

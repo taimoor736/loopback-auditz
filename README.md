@@ -102,7 +102,12 @@ There are a number of configurable options to the mixin:
       "scrub": true,
       "required": false,
       "validateUpsert": true,
-      "silenceWarnings": false
+      "silenceWarnings": false,
+      "revisions": {
+        "name": "other_revisions_table",
+        "dataSource": "db",
+        "autoUpdate": false
+      }
      },
   },
 ```
@@ -142,6 +147,21 @@ This defines whether or not the validateUpsert property is set for the model
 
 ### silenceWarnings
 This defines if the warnings should be suppressed or not
+
+## revisions
+If set to false, this disables keeping track of changes in a revisions model. If it's true or an object, keeping track of 
+changes in a revisions model is enabled, and the following configuration options are availabe if it's an object:
+
+### name
+The name for the revisions model in which to keep changes to the model.
+
+### dataSource
+The dataSource to connect the revisions model to. This dataSource needs to be defined in `datasources.json` first.
+
+### autoUpdate
+If set to false, it will assume the model exists in the dataSource already, and we don't need to create or alter the 
+table. If set to true, it will run autoupdate on the dataSource for the given revisions model name to make sure the table 
+exists with the right columns.
 
 Operation Options
 =================
