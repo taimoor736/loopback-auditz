@@ -141,23 +141,49 @@ export default (Model, bootOptions = {}) => {
             return next();
           }
         } else {
-          if (!ctx.options.oldInstance) {
-            warn(options, 'Cannot register update without old instance. Options: %j', ctx.options);
+          if (ctx.options.oldInstance && ctx.instance) {
+            const inst = ctx.instance;
+            app.models[options.revisionsModelName].create({
+              action: 'update',
+              table_name: Model.modelName,
+              row_id: inst.id,
+              old: ctx.options.oldInstance,
+              new: inst,
+              user: currentUser,
+              ip: ip,
+              ip_forwarded: ipForwarded,
+            }, next);
+          } else if (ctx.options.oldInstances) {
+            const updatedIds = ctx.options.oldInstances.map(inst => { return inst.id; });
+            let newInst = {};
+            const query = {where: {[ idName ]: {inq: updatedIds}}};
+            app.models[Model.modelName].find(query, (error, newInstances) => {
+              if (error) {
+                return next(error);
+              }
+              newInstances.forEach(inst => {
+                newInst[ inst[ idName ] ] = inst;
+              });
+              const entries = ctx.options.oldInstances.map(inst => {
+                return {
+                  action: 'update',
+                  table_name: Model.modelName,
+                  row_id: inst.id,
+                  old: inst,
+                  new: newInst[inst.id],
+                  user: currentUser,
+                  ip: ip,
+                  ip_forwarded: ipForwarded,
+                };
+              });
+              app.models[options.revisionsModelName].create(entries, next);
+            });
+          } else {
+            warn(options, 'Cannot register update without old and new instance. Options: %j', ctx.options);
             warn(options, 'instance: %j', ctx.instance);
             warn(options, 'data: %j', ctx.data);
             return next();
           }
-          const inst = ctx.instance || ctx.data;
-          app.models[options.revisionsModelName].create({
-            action: 'update',
-            table_name: Model.modelName,
-            row_id: inst.id,
-            old: ctx.options.oldInstance,
-            new: inst,
-            user: currentUser,
-            ip: ip,
-            ip_forwarded: ipForwarded,
-          }, next);
         }
       }
     });
@@ -187,19 +213,17 @@ export default (Model, bootOptions = {}) => {
             }
           });
         } else {
-          const query = {filter: ctx.where} || {};
+          const query = {where: ctx.where} || {};
           Model.find(query, (err, oldInstances) => {
             if (err) {
               console.error(err);
               cb(err);
             } else {
               if (oldInstances.length > 1) {
-                warn(options, 'MULTIPLE old instances found');
                 return cb(null, oldInstances);
               } else if (oldInstances.length === 0) {
                 return cb();
               }
-              // TODO: handle multiple updates at once!
               cb(null, oldInstances[0]);
             }
           });
