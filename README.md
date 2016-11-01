@@ -9,7 +9,7 @@ It consists of a group of functionalities:
 * Soft Deletes (based upon the work of [loopback-softdelete-mixin](https://github.com/gausie/loopback-softdelete-mixin)).
 * Timestamps of updates/creates (based upon the work of [loopback-ds-timestamp-mixin](https://github.com/clarkbw/loopback-ds-timestamp-mixin)). 
 * Registration of the user that created/updated/deleted (thanks to the work of [loopback-component-remote-ctx](https://github.com/snowyu/loopback-component-remote-ctx.js)).
-* History logging in a separate table (a port of [Sofa/Revisionable](https://github.com/jarektkaczyk/revisionable)). *NOT YET IMPLEMENTED*
+* History logging in a separate table (a port of [Sofa/Revisionable](https://github.com/jarektkaczyk/revisionable)). 
 
 Install
 =======
