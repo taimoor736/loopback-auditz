@@ -11,6 +11,8 @@ It consists of a group of functionalities:
 * Registration of the user that created/updated/deleted (thanks to the work of [loopback-component-remote-ctx](https://github.com/snowyu/loopback-component-remote-ctx.js)).
 * History logging in a separate table (a port of [Sofa/Revisionable](https://github.com/jarektkaczyk/revisionable)). 
 
+Each of these main functionalities can be turned off individually.
+
 Install
 =======
 
@@ -97,6 +99,7 @@ There are a number of configurable options to the mixin:
       "createdBy": "created_by",
       "updatedBy": "updated_by",
       "deletedBy": "deleted_by",
+      "softDelete": true,
       "unknownUser": 0,
       "remoteCtx": "remoteCtx",
       "scrub": true,
@@ -113,22 +116,26 @@ There are a number of configurable options to the mixin:
 ```
 
 ### createdAt
-This allows you to define an alternative name for the createdAt field
+This allows you to define an alternative name for the createdAt field. When set to `false`, this property will not be defined nor used.
 
 ### updatedAt
-This allows you to define an alternative name for the updatedAt field
+This allows you to define an alternative name for the updatedAt field. When set to `false`, this property will not be defined nor used.
 
 ### deletedAt
-This allows you to define an alternative name for the deletedAt field
+This allows you to define an alternative name for the deletedAt field. If you don't want the soft delete functionality, specify `'softDelete': false` in the options.
 
 ### createdBy
-This allows you to define an alternative name for the createdBy field
+This allows you to define an alternative name for the createdBy field. When set to `false`, this property will not be defined nor used.
 
 ### updatedBy
-This allows you to define an alternative name for the updatedBy field
+This allows you to define an alternative name for the updatedBy field. When set to `false`, this property will not be defined nor used.
 
 ### deletedBy
-This allows you to define an alternative name for the deletedBy field
+This allows you to define an alternative name for the deletedBy field.If you don't want the soft delete functionality, specify `'softDelete': false` in the options.
+
+### softDelete
+By default, soft delete functionality is turned on and uses the deletedAt and deletedBy configuration options. If you set softDelete to false, it completely ignores
+deletedAt, deletedBy and scrub, and all deletes will become hard deletes.
 
 ### unknownUser
 This allows you to define which userId should be filled out when no current user can be determined
@@ -137,7 +144,8 @@ This allows you to define which userId should be filled out when no current user
 The value you provided in `component-config.json` for `argName` of `loopback-component-remote-ctx`
 
 ### scrub
-If true, this sets all but the "id" fields to null. If an array, it will only scrub properties with those names.
+If true, this sets all but the "id" fields to null. If an array, it will only scrub properties with those names. However, if you specified `softDelete: false` this option
+will be ignored.
 
 ### required
 This defines the requiredness of the createdAt and updatedAt fields. The `deletedAt` field is never required
@@ -180,10 +188,10 @@ Book.updateOrCreate({name: 'New name', id: 2}, {skipUpdatedAt: true}, function(e
 });
 ```
 
-Retrieving deleted entities
----------------------------
+Retrieving soft deleted entities
+--------------------------------
 
-To run queries that include deleted items in the response, add `{ deleted: true }` to the query object (at the same level as `where`, `include` etc).
+Unless you specified softDelete to be turned off, you can run queries that include deleted items in the response, by adding `{ deleted: true }` to the query object (at the same level as `where`, `include` etc).
 
 License
 =======
