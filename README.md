@@ -1,7 +1,24 @@
-[![Coverage Status](https://coveralls.io/repos/github/jouke/loopback-auditz/badge.svg?branch=master)](https://coveralls.io/github/jouke/loopback-auditz?branch=master)
+<!-- TITLE/ -->
 
-LoopBack Auditz
-===============
+<h1>loopback-auditz</h1>
+
+<!-- /TITLE -->
+
+
+<!-- BADGES/ -->
+
+<span class="badge-travisci"><a href="http://travis-ci.org/jouke/loopback-auditz" title="Check this project's build status on TravisCI"><img src="https://img.shields.io/travis/jouke/loopback-auditz/master.svg" alt="Travis CI Build Status" /></a></span>
+<span class="badge-npmversion"><a href="https://npmjs.org/package/loopback-auditz" title="View this project on NPM"><img src="https://img.shields.io/npm/v/loopback-auditz.svg" alt="NPM version" /></a></span>
+<span class="badge-npmdownloads"><a href="https://npmjs.org/package/loopback-auditz" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/loopback-auditz.svg" alt="NPM downloads" /></a></span>
+<span class="badge-coveralls"><a href="https://coveralls.io/r/jouke/loopback-auditz" title="View this project's coverage on Coveralls"><img src="https://img.shields.io/coveralls/jouke/loopback-auditz.svg" alt="Coverage Status" /></a></span>
+<span class="badge-daviddm"><a href="https://david-dm.org/jouke/loopback-auditz" title="View the status of this project's dependencies on DavidDM"><img src="https://img.shields.io/david/jouke/loopback-auditz.svg" alt="Dependency Status" /></a></span>
+<span class="badge-daviddmdev"><a href="https://david-dm.org/jouke/loopback-auditz#info=devDependencies" title="View the status of this project's development dependencies on DavidDM"><img src="https://img.shields.io/david/dev/jouke/loopback-auditz.svg" alt="Dev Dependency Status" /></a></span>
+
+<!-- /BADGES -->
+
+
+Description
+===========
 
 This module is designed for the [Strongloop Loopback](https://github.com/strongloop/loopback) framework. It provides extensive support for Audit Trails in your LoopBack based application.
 
@@ -193,11 +210,26 @@ Retrieving soft deleted entities
 
 Unless you specified softDelete to be turned off, you can run queries that include deleted items in the response, by adding `{ deleted: true }` to the query object (at the same level as `where`, `include` etc).
 
-License
-=======
-[ISC](LICENSE.md)
 
-Author
-======
+<!-- CONTRIBUTE/ -->
 
-Jouke Visser <jouke at studio-mv dot nl>
+<h2>Contribute</h2>
+
+<a href="https://github.com/jouke/loopback-auditz/blob/master/CONTRIBUTING.md#files">Discover how you can contribute by heading on over to the <code>CONTRIBUTING.md</code> file.</a>
+
+<!-- /CONTRIBUTE -->
+
+
+<!-- LICENSE/ -->
+
+<h2>License</h2>
+
+Unless stated otherwise all works are:
+
+<ul><li>Copyright &copy; <a href="jouke@studio-mv.nl">Jouke Visser</a></li></ul>
+
+and licensed under:
+
+<ul><li><a href="http://spdx.org/licenses/ISC.html">ISC License</a></li></ul>
+
+<!-- /LICENSE -->
