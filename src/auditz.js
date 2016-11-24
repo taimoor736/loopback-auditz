@@ -29,7 +29,7 @@ export default (Model, bootOptions = {}) => {
     revisions: {
       name: 'revisions',
       dataSource: 'db',
-      autoMigrate: true,
+      autoUpdate: true,
     },
   }, bootOptions);
 
@@ -113,10 +113,7 @@ export default (Model, bootOptions = {}) => {
     }
 
     Model.getApp((err, a) => {
-      if (err) {
-        console.error('Cannot get app! ', err);
-        return next(err);
-      }
+      if (err) { return next(err); }
       app = a;
       let ipForwarded = '';
       let ip = '127.0.0.1';
@@ -185,9 +182,7 @@ export default (Model, bootOptions = {}) => {
             let newInst = {};
             const query = {where: {[ idName ]: {inq: updatedIds}}};
             app.models[Model.modelName].find(query, (error, newInstances) => {
-              if (error) {
-                return next(error);
-              }
+              if (error) { return next(error); }
               newInstances.forEach(inst => {
                 newInst[ inst[ idName ] ] = inst;
               });
@@ -232,18 +227,12 @@ export default (Model, bootOptions = {}) => {
         }
         if (id) {
           Model.findById(id, {deleted: true}, (err, oldInstance) => {
-            if (err) {
-              console.error(err);
-              cb(err);
-            } else {
-              cb(null, oldInstance);
-            }
+            if (err) { cb(err); } else { cb(null, oldInstance); }
           });
         } else {
           const query = {where: ctx.where} || {};
           Model.find(query, (err, oldInstances) => {
             if (err) {
-              console.error(err);
               cb(err);
             } else {
               if (oldInstances.length > 1) {
@@ -401,7 +390,7 @@ export default (Model, bootOptions = {}) => {
     Model.count = function countDeleted(where = {}, ...rest) {
       // Because count only receives a 'where', there's nowhere to ask for the deleted entities.
       let whereNotDeleted;
-      if (where || Object.keys(where).length === 0) {
+      if (!where || Object.keys(where).length === 0) {
         whereNotDeleted = queryNonDeleted;
       } else {
         whereNotDeleted = { and: [ where, queryNonDeleted ] };
