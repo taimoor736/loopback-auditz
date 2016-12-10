@@ -125,6 +125,7 @@ There are a number of configurable options to the mixin:
       "silenceWarnings": false,
       "revisions": {
         "name": "other_revisions_table",
+        "idType": "Number",
         "dataSource": "db",
         "autoUpdate": false
       }
@@ -180,6 +181,9 @@ changes in a revisions model is enabled, and the following configuration options
 ### name
 The name for the revisions model in which to keep changes to the model.
 
+### idType
+The data type to assume for id fields. The default is 'Number', which is fine for most databases, but (for example) MongoDB uses strings, so in that case provide "String" as the value for idType.
+
 ### dataSource
 The dataSource to connect the revisions model to. This dataSource needs to be defined in `datasources.json` first.
 
@@ -187,6 +191,11 @@ The dataSource to connect the revisions model to. This dataSource needs to be de
 If set to false, it will assume the model exists in the dataSource already, and we don't need to create or alter the 
 table. If set to true, it will run autoupdate on the dataSource for the given revisions model name to make sure the table 
 exists with the right columns.
+
+Usage with MongoDB
+==================
+
+In case you use MongoDB with this module, and also use the 'revisions' table option, you need to configure the idType as a 'String'. Otherwise this module will attempt to store the non-numeric id in the row_id property of the revisions model, which is a Number by default.
 
 Operation Options
 =================

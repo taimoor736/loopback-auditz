@@ -28,6 +28,7 @@ export default (Model, bootOptions = {}) => {
     silenceWarnings: false,
     revisions: {
       name: 'revisions',
+      idType: 'Number',
       dataSource: 'db',
       autoUpdate: true,
     },
@@ -415,6 +416,8 @@ export default (Model, bootOptions = {}) => {
     const autoUpdate = (opts.revisions === true || (typeof opts.revisions === 'object' && opts.revisions.autoUpdate));
     const dsName = (typeof opts.revisions === 'object' && opts.revisions.dataSource) ?
       opts.revisions.dataSource : 'db';
+    const rowIdType = (typeof opts.revisions === 'object' && opts.revisions.idType) ?
+      opts.revisions.idType : 'Number';
 
     const revisionsDef = require('./models/revision.json');
     let settings = {};
@@ -424,6 +427,7 @@ export default (Model, bootOptions = {}) => {
       }
     }
 
+    revisionsDef.properties.row_id.type = rowIdType;
     const revisionsModel = app.dataSources[dsName].createModel(
       options.revisionsModelName,
       revisionsDef.properties,
