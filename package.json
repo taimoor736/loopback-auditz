@@ -10,7 +10,6 @@
     "pretest": "eslint ./src/*.js && gulp babel",
     "test": "nyc tap ./test/*.js",
     "watch": "gulp",
-    "postinstall": "npm run compile",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "outdated": "npm outdated --depth=0"
   },
