@@ -324,7 +324,7 @@ export default (Model, bootOptions = {}) => {
         callback = where;
         query = {};
       }
-      return Model.updateAll(query, { ...scrubbed }, {delete: true})
+      Model.updateAll(query, { ...scrubbed }, {delete: true})
         .then(result => (typeof callback === 'function') ? callback(null, result) : result)
         .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
     };
@@ -339,7 +339,7 @@ export default (Model, bootOptions = {}) => {
         newOpt.remoteCtx = opt.remoteCtx;
       }
 
-      return Model.updateAll({ [idName]: id }, { ...scrubbed}, newOpt)
+      Model.updateAll({ [idName]: id }, { ...scrubbed}, newOpt)
         .then(result => (typeof callback === 'function') ? callback(null, result) : result)
         .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
     };
@@ -350,7 +350,7 @@ export default (Model, bootOptions = {}) => {
     Model.prototype.destroy = function softDestroy(opt, cb) {
       const callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
 
-      return this.updateAttributes({ ...scrubbed }, {delete: true})
+      this.updateAttributes({ ...scrubbed }, {delete: true})
         .then(result => (typeof cb === 'function') ? callback(null, result) : result)
         .catch(error => (typeof cb === 'function') ? callback(error) : Promise.reject(error));
     };
