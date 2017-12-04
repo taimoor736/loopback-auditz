@@ -3,7 +3,6 @@ coverage/
 npm-debug.log
 
 /.idea/
-debug.js
 *.map
 .nyc_output
 .coveralls.yml
