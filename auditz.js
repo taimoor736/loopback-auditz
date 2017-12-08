@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
@@ -27,6 +23,10 @@ var _extends4 = _interopRequireDefault(_extends3);
 var _debug2 = require('./debug');
 
 var _debug3 = _interopRequireDefault(_debug2);
+
+var _utils = require('loopback/lib/utils');
+
+var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -368,16 +368,17 @@ exports.default = function (Model) {
   if (options.softDelete) {
     Model.destroyAll = function softDestroyAll(where, cb) {
       var query = where || {};
-      var callback = cb;
+      var callback = cb || _utils2.default.createPromiseCallback();
       if (typeof where === 'function') {
         callback = where;
         query = {};
       }
       Model.updateAll(query, (0, _extends4.default)({}, scrubbed), { delete: true }).then(function (result) {
-        return typeof callback === 'function' ? callback(null, result) : result;
+        return callback(null, result);
       }).catch(function (error) {
-        return typeof callback === 'function' ? callback(error) : _promise2.default.reject(error);
+        return callback(error);
       });
+      return callback.promise;
     };
 
     Model.remove = Model.destroyAll;
@@ -385,16 +386,18 @@ exports.default = function (Model) {
 
     Model.destroyById = function softDestroyById(id, opt, cb) {
       var callback = cb === undefined && typeof opt === 'function' ? opt : cb;
+      callback = callback || _utils2.default.createPromiseCallback();
       var newOpt = { delete: true };
       if ((typeof opt === 'undefined' ? 'undefined' : (0, _typeof3.default)(opt)) === 'object') {
         newOpt.remoteCtx = opt.remoteCtx;
       }
 
       Model.updateAll((0, _defineProperty3.default)({}, idName, id), (0, _extends4.default)({}, scrubbed), newOpt).then(function (result) {
-        return typeof callback === 'function' ? callback(null, result) : result;
+        return callback(null, result);
       }).catch(function (error) {
-        return typeof callback === 'function' ? callback(error) : _promise2.default.reject(error);
+        return callback(error);
       });
+      return callback.promise;
     };
 
     Model.removeById = Model.destroyById;
@@ -402,12 +405,13 @@ exports.default = function (Model) {
 
     Model.prototype.destroy = function softDestroy(opt, cb) {
       var callback = cb === undefined && typeof opt === 'function' ? opt : cb;
-
+      callback = callback || _utils2.default.createPromiseCallback();
       this.updateAttributes((0, _extends4.default)({}, scrubbed), { delete: true }).then(function (result) {
-        return typeof cb === 'function' ? callback(null, result) : result;
+        return callback(null, result);
       }).catch(function (error) {
-        return typeof cb === 'function' ? callback(error) : _promise2.default.reject(error);
+        return callback(error);
       });
+      return callback.promise;
     };
 
     Model.prototype.remove = Model.prototype.destroy;

@@ -1,5 +1,5 @@
 import _debug from './debug';
-
+import loopbackUtils from 'loopback/lib/utils';
 const debug = _debug();
 const warn = (options, ...rest) => {
   if (!options.silenceWarnings) {
@@ -319,40 +319,44 @@ export default (Model, bootOptions = {}) => {
   if (options.softDelete) {
     Model.destroyAll = function softDestroyAll(where, cb) {
       let query = where || {};
-      let callback = cb;
+      let callback = cb || loopbackUtils.createPromiseCallback();
       if (typeof where === 'function') {
         callback = where;
         query = {};
       }
       Model.updateAll(query, { ...scrubbed }, {delete: true})
-        .then(result => (typeof callback === 'function') ? callback(null, result) : result)
-        .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
+        .then(result => callback(null, result))
+        .catch(error => callback(error));
+      return callback.promise;
     };
 
     Model.remove = Model.destroyAll;
     Model.deleteAll = Model.destroyAll;
 
     Model.destroyById = function softDestroyById(id, opt, cb) {
-      const callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
+      let callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
+      callback = callback || loopbackUtils.createPromiseCallback();
       let newOpt = {delete: true};
       if (typeof opt === 'object') {
         newOpt.remoteCtx = opt.remoteCtx;
       }
 
       Model.updateAll({ [idName]: id }, { ...scrubbed}, newOpt)
-        .then(result => (typeof callback === 'function') ? callback(null, result) : result)
-        .catch(error => (typeof callback === 'function') ? callback(error) : Promise.reject(error));
+        .then(result => callback(null, result))
+        .catch(error => callback(error));
+      return callback.promise;
     };
 
     Model.removeById = Model.destroyById;
     Model.deleteById = Model.destroyById;
 
     Model.prototype.destroy = function softDestroy(opt, cb) {
-      const callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
-
+      let callback = (cb === undefined && typeof opt === 'function') ? opt : cb;
+      callback = callback || loopbackUtils.createPromiseCallback();
       this.updateAttributes({ ...scrubbed }, {delete: true})
-        .then(result => (typeof cb === 'function') ? callback(null, result) : result)
-        .catch(error => (typeof cb === 'function') ? callback(error) : Promise.reject(error));
+        .then(result => callback(null, result))
+        .catch(error => callback(error));
+      return callback.promise;
     };
 
     Model.prototype.remove = Model.prototype.destroy;
